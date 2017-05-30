@@ -235,12 +235,21 @@ exports.storeHits = function(hits) {
             _version: hit._version ? hit._version : null
         }
 		if (hit.fields) {
-            ['_timestamp', '_routing', '_version', '_percolate', '_parent', '_ttl'].forEach(function(field){
+            ['_timestamp', '_routing', '_percolate', '_parent', '_ttl'].forEach(function(field){
                 if (hit.fields[field]) {
                     metaData[op][field] = hit.fields[field];
                 }
             });
 		}
+        delete hit._source['id'];
+        delete hit._source['_type'];
+        delete hit._source['_index'];
+        delete hit._source['_version'];
+        if (hit._source['ngrams']) {
+            hit._source['ngrams'].forEach(function(ngram) {
+                delete ngram['field'];
+            });
+        }
 		data += JSON.stringify(metaData) + '\n' + JSON.stringify(hit._source) + '\n';
 	});
     if (data.length) {
